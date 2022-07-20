@@ -12,6 +12,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.belarusweather.databinding.ActivityMainBinding
 import com.example.belarusweather.entity.DataWeatherEntity
 import com.example.belarusweather.viewModels.BWViewModel
 import com.squareup.picasso.Picasso
@@ -25,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var prefs: SharedPreferences
     var cityStart: String = ""
     lateinit var currentCity: String
+    private lateinit var binding: ActivityMainBinding
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,28 +37,21 @@ class MainActivity : AppCompatActivity() {
             "settings", Context.MODE_PRIVATE
         )
 
-        val city: TextView = findViewById(R.id.city)
-        val temperature: TextView = findViewById(R.id.temp)
-        val image: ImageView = findViewById(R.id.currentWeatherimg)
-        val pressure: TextView = findViewById(R.id.pressure)
-        val humidity: TextView = findViewById(R.id.humadity)
-        val feels: TextView = findViewById(R.id.feelsTemp)
-        val windy: TextView = findViewById(R.id.windParam)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val recyclerview: RecyclerView = findViewById(R.id.recyclerView)
-        recyclerview.layoutManager = LinearLayoutManager(this)
-        recyclerview.adapter = adapter
-        recyclerview.setHasFixedSize(true)
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.setHasFixedSize(true)
 
-        val spinner: Spinner = findViewById(R.id.spinner2)
         val arrayCities = resources.getStringArray(R.array.cities)
         val spinnerAdapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item, arrayCities
         )
 
-        spinner.adapter = spinnerAdapter
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.spinner2.adapter = spinnerAdapter
+        binding.spinner2.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>,
                 view: View?,
@@ -64,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                 id: Long
             ) {
                 if (parent.selectedItem.toString() == "Choose the city") {
-                    model.setCity(cityStart,this@MainActivity)
+                    model.setCity(cityStart, this@MainActivity)
                     currentCity = cityStart
                 } else {
                     model.setCity(parent.selectedItem.toString(), this@MainActivity)
@@ -80,17 +75,17 @@ class MainActivity : AppCompatActivity() {
         model.dataWeather.observe(this) {
             val data: Array<DataWeatherEntity> = it
             adapter.setData(data)
-            city.text = data[0].city
-            temperature.text = "${data[0].temperature.toInt()} C"
-            pressure.text = "Pressure ${data[0].pressure} pH"
-            humidity.text = "Humidity ${data[0].humidity}  %"
-            feels.text = "Feels like ${data[0].feelLike.toInt()} C"
-            windy.text = "Wind speed ${data[0].wind} m/s"
+            binding.city.text = data[0].city
+            binding.temp.text = "${data[0].temperature.toInt()} C"
+            binding.pressure.text = "Pressure ${data[0].pressure} pH"
+            binding.humadity.text = "Humidity ${data[0].humidity}  %"
+            binding.feelsTemp.text = "Feels like ${data[0].feelLike.toInt()} C"
+            binding.windParam.text = "Wind speed ${data[0].wind} m/s"
 
             val icon = data[0].image
             Picasso.get().load("https://openweathermap.org/img/wn/$icon.png")
                 .resize(300, 300)
-                .into(image)
+                .into(binding.currentWeatherimg)
         }
     }
 
